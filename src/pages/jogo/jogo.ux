@@ -1,0 +1,172 @@
+<template>
+  <div class="page">
+    <text class="situacao">{{ situacao }}</text>
+    <div class="linha linha-eu" onclick="pontoEu">
+      <div class="nome-col">
+        <text class="saque">{{ saqueEu }}</text>
+        <text class="nome">EU</text>
+      </div>
+      <text class="games">{{ gamesEu }}</text>
+      <text class="pontos">{{ pontosEu }}</text>
+    </div>
+    <div class="linha linha-adv" onclick="pontoAdv">
+      <div class="nome-col">
+        <text class="saque">{{ saqueAdv }}</text>
+        <text class="nome">ADV</text>
+      </div>
+      <text class="games">{{ gamesAdv }}</text>
+      <text class="pontos">{{ pontosAdv }}</text>
+    </div>
+    <div class="rodape">
+      <text class="botao" onclick="desfazer">DESFAZER</text>
+      <text class="botao {{ confirmandoNovo ? 'botao-alerta' : '' }}" onclick="novo">{{ textoNovo }}</text>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from '@system.router'
+import vibrator from '@system.vibrator'
+import brightness from '@system.brightness'
+import { novoJogo, ponto, textoPontos, linhaGames, rotuloSituacao } from '../../common/placar'
+import { carregar, salvar, apagar } from '../../common/salvo'
+
+var LIMITE_HISTORICO = 100
+var estado = null
+var historico = []
+var timerNovo = null
+
+function vibrar(modo) {
+  try { vibrator.vibrate({ mode: modo }) } catch (e) {}
+}
+
+export default {
+  protected: {
+    modo: 'novo',
+    sets: '3',
+    vantagem: '1',
+    sacador: '0'
+  },
+  private: {
+    situacao: '',
+    saqueEu: '',
+    saqueAdv: '',
+    gamesEu: '',
+    gamesAdv: '',
+    pontosEu: '0',
+    pontosAdv: '0',
+    confirmandoNovo: false,
+    textoNovo: 'NOVO'
+  },
+  onInit() {
+    var pagina = this
+    historico = []
+    if (this.modo === 'continuar') {
+      carregar(function (dados) {
+        if (dados) {
+          estado = dados.estado
+          historico = dados.historico || []
+        } else {
+          estado = pagina.criarJogo()
+        }
+        pagina.mostrar()
+      })
+    } else {
+      estado = this.criarJogo()
+      salvar(estado, historico)
+      this.mostrar()
+    }
+  },
+  onShow() {
+    // Mantém a tela acesa durante a partida, se o firmware permitir.
+    try { brightness.setKeepScreenOn({ keepScreenOn: true }) } catch (e) {}
+  },
+  onHide() {
+    try { brightness.setKeepScreenOn({ keepScreenOn: false }) } catch (e) {}
+  },
+  onDestroy() {
+    if (timerNovo !== null) clearTimeout(timerNovo)
+    timerNovo = null
+  },
+  criarJogo() {
+    return novoJogo({
+      sets: parseInt(this.sets, 10) || 3,
+      vantagem: this.vantagem !== '0',
+      sacador: this.sacador === '1' ? 1 : 0
+    })
+  },
+  mostrar() {
+    if (!estado) return
+    var p = textoPontos(estado)
+    var fim = estado.vencedor !== null
+    this.situacao = rotuloSituacao(estado)
+    this.pontosEu = fim ? (estado.vencedor === 0 ? 'V' : '') : p[0]
+    this.pontosAdv = fim ? (estado.vencedor === 1 ? 'V' : '') : p[1]
+    this.gamesEu = linhaGames(estado, 0).join(' ')
+    this.gamesAdv = linhaGames(estado, 1).join(' ')
+    this.saqueEu = !fim && estado.sacador === 0 ? '●' : ''
+    this.saqueAdv = !fim && estado.sacador === 1 ? '●' : ''
+  },
+  marcar(jogador) {
+    if (!estado || estado.vencedor !== null) return
+    var antes = estado
+    var depois = ponto(estado, jogador)
+    historico.push(antes)
+    if (historico.length > LIMITE_HISTORICO) historico.shift()
+    estado = depois
+    salvar(estado, historico)
+    // Vibração curta a cada ponto e longa quando fecha game, set ou partida.
+    var fechouGame = depois.games[0] + depois.games[1] !== antes.games[0] + antes.games[1] ||
+      depois.setsFechados.length !== antes.setsFechados.length
+    vibrar(fechouGame || depois.vencedor !== null ? 'long' : 'short')
+    this.mostrar()
+  },
+  pontoEu() {
+    this.marcar(0)
+  },
+  pontoAdv() {
+    this.marcar(1)
+  },
+  desfazer() {
+    if (historico.length === 0) return
+    estado = historico.pop()
+    salvar(estado, historico)
+    vibrar('short')
+    this.mostrar()
+  },
+  novo() {
+    // Pede um segundo toque para não perder a partida por engano.
+    if (!this.confirmandoNovo) {
+      var pagina = this
+      this.confirmandoNovo = true
+      this.textoNovo = 'CONFIRMA?'
+      timerNovo = setTimeout(function () {
+        pagina.confirmandoNovo = false
+        pagina.textoNovo = 'NOVO'
+        timerNovo = null
+      }, 3000)
+      return
+    }
+    if (timerNovo !== null) clearTimeout(timerNovo)
+    timerNovo = null
+    apagar()
+    router.back()
+  }
+}
+</script>
+
+<style>
+.page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 10px; }
+.situacao { height: 24px; font-size: 14px; font-weight: bold; color: #c8f04a; text-align: center; }
+.linha { width: 184px; height: 98px; margin-top: 4px; border-radius: 16px; flex-direction: row; align-items: center; padding-left: 8px; padding-right: 8px; }
+.linha-eu { background-color: #12331f; }
+.linha-adv { background-color: #1f2a3a; }
+.nome-col { width: 40px; flex-direction: column; align-items: center; }
+.saque { height: 18px; font-size: 14px; color: #c8f04a; text-align: center; }
+.nome { height: 22px; font-size: 15px; font-weight: bold; color: #ffffff; text-align: center; }
+.games { width: 64px; font-size: 18px; color: #cfd8d3; text-align: center; }
+.pontos { width: 64px; font-size: 40px; font-weight: bold; color: #ffffff; text-align: right; }
+.rodape { width: 184px; height: 44px; margin-top: 8px; flex-direction: row; justify-content: space-between; }
+.botao { width: 89px; height: 44px; font-size: 13px; font-weight: bold; color: #ffffff; text-align: center; background-color: #2a2a2a; border-radius: 22px; }
+.botao-alerta { background-color: #a33a2a; }
+</style>
