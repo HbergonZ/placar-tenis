@@ -39,7 +39,17 @@ if (!apk) falhar('Mi Fitness (com.xiaomi.wearable) não está instalado. A vers�
 // --- Build ---
 if (!semBuild) {
   console.log('==> Compilando...')
-  rodar('npm', ['run', 'build'], { cwd: raiz, stdio: 'inherit', shell: true })
+  // O aiot às vezes falha com EBUSY ao apagar a pasta temporária (VS Code observando); uma nova tentativa resolve.
+  for (let tentativa = 1; ; tentativa++) {
+    try {
+      rodar('npm', ['run', 'build'], { cwd: raiz, stdio: 'pipe', shell: true })
+      break
+    } catch (e) {
+      if (tentativa >= 3) falhar('build falhou 3 vezes:\n' + (e.stdout || '') + (e.stderr || ''))
+      console.log('==> Build falhou; tentando de novo...')
+      await espera(3000)
+    }
+  }
 }
 const rpks = existsSync(join(raiz, 'dist')) ? readdirSync(join(raiz, 'dist')).filter((f) => f.endsWith('.rpk')).sort() : []
 if (!rpks.length) falhar('nenhum .rpk em dist/')
@@ -66,6 +76,11 @@ if (!temDex) {
 // --- Envia o RPK e abre a página de debug ---
 adb('shell', 'mkdir', '-p', '/sdcard/Xiaomi-band')
 adb('push', rpk, '/sdcard/Xiaomi-band/' + nomeRpk)
+// A automação da tela só funciona com o celular acordado e desbloqueado.
+adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP')
+if (/KeyguardStateMonitor\s+mIsShowing=true/.test(adb('shell', 'dumpsys', 'window'))) {
+  falhar('o celular está bloqueado. Desbloqueie a tela e rode de novo.')
+}
 console.log('==> Abrindo a página de debug do Mi Fitness...')
 const saida = adb('shell', `CLASSPATH=${dexCelular} app_process / LaunchFragment ${apk}`)
 if (!saida.includes('SUCCESS')) falhar('não abriu a página de debug: ' + saida)
@@ -87,21 +102,31 @@ async function tocar(regex, descricao) {
 }
 
 console.log('==> Digitando o nome do pacote...')
-await tocar(/text="click to input package name"/, 'click to input package name')
-const campo = achar(/class="android.widget.EditText"/)
-if (campo) adb('shell', 'input', 'tap', String(campo[0]), String(campo[1]))
+// Às vezes o primeiro toque chega antes da página responder e o diálogo não abre; tenta até 3 vezes.
+let campo = null
+for (let tentativa = 0; tentativa < 3 && !campo; tentativa++) {
+  await tocar(/text="click to input package name"/, 'click to input package name')
+  campo = achar(/class="android.widget.EditText"/)
+}
+if (!campo) falhar('o diálogo do nome do pacote não abriu')
+adb('shell', 'input', 'tap', String(campo[0]), String(campo[1]))
 await espera(500)
-// O teclado Samsung põe um espaço depois do primeiro ponto: digita o ponto como tecla e apaga o espaço.
+// Alguns teclados Samsung põem um espaço depois do primeiro ponto; só apaga se o espaço apareceu.
+function textoDoCampo() {
+  adb('shell', 'uiautomator', 'dump', '/sdcard/ui_tmp.xml')
+  const m = adb('shell', 'cat', '/sdcard/ui_tmp.xml').match(/text="([^"]*)"[^>]*class="android.widget.EditText"/)
+  return m ? m[1] : null
+}
 const primeiro = pkg.slice(0, pkg.indexOf('.'))
 adb('shell', 'input', 'text', primeiro)
 await espera(200)
 adb('shell', 'input', 'keyevent', '56')
 await espera(300)
-adb('shell', 'input', 'keyevent', '67')
-await espera(100)
+if ((textoDoCampo() || '').endsWith(' ')) adb('shell', 'input', 'keyevent', '67')
 adb('shell', 'input', 'text', pkg.slice(pkg.indexOf('.') + 1))
 await espera(600)
-console.log('    Confira no celular se o campo mostra ' + pkg)
+const digitado = textoDoCampo()
+if (digitado !== null && digitado !== pkg) console.log(`    AVISO: o campo mostra "${digitado}", esperado "${pkg}"`)
 await tocar(/text="OK"/, 'OK')
 
 if (desinstalar) {

@@ -3,18 +3,18 @@
     <text class="situacao">{{ situacao }}</text>
     <div class="linha linha-eu" onclick="pontoEu">
       <div class="nome-col">
-        <text class="saque">{{ saqueEu }}</text>
+        <div class="bola {{ saqueEu ? 'bola-on' : '' }}"></div>
         <text class="nome">EU</text>
       </div>
-      <text class="games">{{ gamesEu }}</text>
+      <text class="games {{ gamesLongos ? 'games-longos' : '' }}">{{ gamesEu }}</text>
       <text class="pontos">{{ pontosEu }}</text>
     </div>
     <div class="linha linha-adv" onclick="pontoAdv">
       <div class="nome-col">
-        <text class="saque">{{ saqueAdv }}</text>
+        <div class="bola {{ saqueAdv ? 'bola-on' : '' }}"></div>
         <text class="nome">ADV</text>
       </div>
-      <text class="games">{{ gamesAdv }}</text>
+      <text class="games {{ gamesLongos ? 'games-longos' : '' }}">{{ gamesAdv }}</text>
       <text class="pontos">{{ pontosAdv }}</text>
     </div>
     <div class="rodape">
@@ -49,10 +49,11 @@ export default {
   },
   private: {
     situacao: '',
-    saqueEu: '',
-    saqueAdv: '',
+    saqueEu: false,
+    saqueAdv: false,
     gamesEu: '',
     gamesAdv: '',
+    gamesLongos: false,
     pontosEu: '0',
     pontosAdv: '0',
     confirmandoNovo: false,
@@ -104,8 +105,10 @@ export default {
     this.pontosAdv = fim ? (estado.vencedor === 1 ? 'V' : '') : p[1]
     this.gamesEu = linhaGames(estado, 0).join(' ')
     this.gamesAdv = linhaGames(estado, 1).join(' ')
-    this.saqueEu = !fim && estado.sacador === 0 ? '●' : ''
-    this.saqueAdv = !fim && estado.sacador === 1 ? '●' : ''
+    // A partir de 3 sets na linha a fonte grande não cabe na faixa (~66 px).
+    this.gamesLongos = linhaGames(estado, 0).length > 2
+    this.saqueEu = !fim && estado.sacador === 0
+    this.saqueAdv = !fim && estado.sacador === 1
   },
   marcar(jogador) {
     if (!estado || estado.vencedor !== null) return
@@ -139,7 +142,7 @@ export default {
     if (!this.confirmandoNovo) {
       var pagina = this
       this.confirmandoNovo = true
-      this.textoNovo = 'CONFIRMA?'
+      this.textoNovo = 'APAGAR?'
       timerNovo = setTimeout(function () {
         pagina.confirmandoNovo = false
         pagina.textoNovo = 'NOVO'
@@ -156,17 +159,19 @@ export default {
 </script>
 
 <style>
-.page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 10px; }
-.situacao { height: 24px; font-size: 14px; font-weight: bold; color: #c8f04a; text-align: center; }
-.linha { width: 184px; height: 98px; margin-top: 4px; border-radius: 16px; flex-direction: row; align-items: center; padding-left: 8px; padding-right: 8px; }
+.page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 6px; }
+.situacao { height: 26px; font-size: 18px; font-weight: bold; color: #c8f04a; text-align: center; }
+.linha { width: 184px; height: 88px; margin-top: 4px; border-radius: 16px; flex-direction: row; align-items: center; padding-left: 8px; padding-right: 8px; }
 .linha-eu { background-color: #12331f; }
 .linha-adv { background-color: #1f2a3a; }
-.nome-col { width: 40px; flex-direction: column; align-items: center; }
-.saque { height: 18px; font-size: 14px; color: #c8f04a; text-align: center; }
-.nome { height: 22px; font-size: 15px; font-weight: bold; color: #ffffff; text-align: center; }
-.games { width: 64px; font-size: 18px; color: #cfd8d3; text-align: center; }
-.pontos { width: 64px; font-size: 40px; font-weight: bold; color: #ffffff; text-align: right; }
-.rodape { width: 184px; height: 44px; margin-top: 8px; flex-direction: row; justify-content: space-between; }
-.botao { width: 89px; height: 44px; font-size: 13px; font-weight: bold; color: #ffffff; text-align: center; background-color: #2a2a2a; border-radius: 22px; }
+.nome-col { width: 48px; flex-direction: column; align-items: center; }
+.bola { width: 12px; height: 12px; margin-top: 3px; margin-bottom: 3px; border-radius: 6px; background-color: #000000; }
+.bola-on { background-color: #c8f04a; }
+.nome { height: 26px; font-size: 18px; font-weight: bold; color: #ffffff; text-align: center; }
+.games { flex: 1; lines: 1; font-size: 22px; font-weight: bold; color: #ffd60a; text-align: center; }
+.games-longos { font-size: 16px; font-weight: normal; }
+.pontos { width: 54px; font-size: 38px; font-weight: bold; color: #ffffff; text-align: right; }
+.rodape { width: 184px; height: 42px; margin-top: 6px; flex-direction: row; justify-content: space-between; }
+.botao { width: 90px; height: 42px; font-size: 14px; font-weight: bold; color: #ffffff; text-align: center; background-color: #2a2a2a; border-radius: 22px; }
 .botao-alerta { background-color: #a33a2a; }
 </style>

@@ -1,10 +1,10 @@
 <template>
   <div class="page">
-    <text class="titulo">PLACAR TÊNIS</text>
+    <text class="titulo">PLACAR TENIS</text>
     <text class="opcao" onclick="trocarSets">{{ textoSets }}</text>
     <text class="opcao" onclick="trocarVantagem">{{ textoVantagem }}</text>
     <text class="opcao" onclick="trocarSacador">{{ textoSacador }}</text>
-    <text class="botao" onclick="comecar">COMEÇAR</text>
+    <text class="botao" onclick="comecar">COMECAR</text>
     <text class="continuar" show="{{ temSalvo }}" onclick="continuar">CONTINUAR PARTIDA</text>
   </div>
 </template>
@@ -35,7 +35,7 @@ export default {
     })
   },
   atualizar() {
-    this.textoSets = this.sets === 1 ? 'Set único' : 'Melhor de ' + this.sets
+    this.textoSets = this.sets === 1 ? 'Set unico' : 'Melhor de ' + this.sets
     this.textoVantagem = this.vantagem ? 'Com vantagem' : 'Sem vantagem'
     this.textoSacador = this.sacador === 0 ? 'Saque: EU' : 'Saque: ADV'
   },
@@ -65,9 +65,9 @@ export default {
 </script>
 
 <style>
-.page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 18px; }
-.titulo { height: 30px; font-size: 18px; font-weight: bold; color: #c8f04a; text-align: center; }
-.opcao { width: 168px; height: 38px; margin-top: 6px; font-size: 16px; color: #ffffff; text-align: center; background-color: #1c2620; border-radius: 19px; }
-.botao { width: 168px; height: 44px; margin-top: 10px; font-size: 18px; font-weight: bold; color: #000000; text-align: center; background-color: #c8f04a; border-radius: 22px; }
-.continuar { width: 168px; height: 34px; margin-top: 8px; font-size: 13px; color: #c8f04a; text-align: center; }
+.page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 12px; }
+.titulo { height: 30px; font-size: 20px; font-weight: bold; color: #c8f04a; text-align: center; }
+.opcao { width: 176px; height: 40px; margin-top: 5px; font-size: 18px; font-weight: bold; color: #ffffff; text-align: center; background-color: #1c2620; border-radius: 19px; }
+.botao { width: 176px; height: 46px; margin-top: 8px; font-size: 20px; font-weight: bold; color: #000000; text-align: center; background-color: #c8f04a; border-radius: 22px; }
+.continuar { width: 176px; height: 32px; margin-top: 6px; font-size: 17px; color: #c8f04a; text-align: center; }
 </style>

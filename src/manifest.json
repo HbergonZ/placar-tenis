@@ -1,8 +1,8 @@
 {
   "package": "dev.rea.placartenis",
-  "name": "Placar Tênis",
-  "versionName": "0.1.0",
-  "versionCode": 1,
+  "name": "Placar Tenis",
+  "versionName": "0.1.8",
+  "versionCode": 9,
   "minPlatformVersion": 1000,
   "minAPILevel": 1,
   "icon": "/common/icon.png",
