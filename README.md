@@ -4,9 +4,9 @@ App de placar de tênis que roda direto na Xiaomi Smart Band 8 Pro. É um Quick 
 
 ## Funções
 
-- Toque na faixa **EU** ou **ADV** para marcar o ponto.
+- Toque na faixa **EU** ou **ADV** para marcar o ponto. Os games de cada set aparecem em amarelo.
 - Contagem 0/15/30/40, iguais e vantagem (ou ponto decisivo, sem vantagem), games, sets e tie-break em 6-6.
-- Bolinha indica quem saca, inclusive a troca de saque no tie-break.
+- Bolinha verde indica quem saca, inclusive a troca de saque no tie-break.
 - **DESFAZER** volta o último ponto (até 100 pontos).
 - **NOVO** pede um segundo toque antes de apagar a partida.
 - A partida fica salva (`@system.storage`) e pode ser retomada em "CONTINUAR PARTIDA".
@@ -50,10 +50,14 @@ Passos do script:
 3. Digita o nome do pacote e toca em "install third app".
 4. **Passo manual:** escolher o arquivo `dev_rea_placartenis.rpk` no seletor de arquivos.
 
-Para atualizar, aumentar `versionCode` no `src/manifest.json`. Se a pulseira mantiver a versão antiga, rodar `npm run deploy -- --uninstall`.
+Para atualizar, aumentar `versionCode` no `src/manifest.json` e rodar `npm run deploy` de novo; a versão nova substitui a anterior.
 
 ## Limitações conhecidas
 
-- O app ainda não foi testado numa pulseira real nem no emulador.
+- Testado na Band 8 Pro com Galaxy S23 e Mi Fitness 3.59.2i (2026-10-31).
+- A fonte da pulseira não tem letras acentuadas nem símbolos como `●`: textos exibidos ficam em ASCII.
+- A tela útil tem cerca de 192x274 px de CSS; conferir a altura total ao mexer no layout.
+- O "uninstall third app" da página de debug não remove nada nesse firmware (`--uninstall` e `--only-uninstall` ficam no script, mas sem efeito), e a pulseira não oferece remoção de apps. Só desparear (reset de fábrica) remove o app.
+- Por isso o ícone da lista ficou o da primeira instalação: a pulseira não atualiza o ícone em reinstalações. Mudar o ícone exigiria outro nome de pacote (deixando o app antigo na lista) ou um reset.
 - A página de debug é interna do Mi Fitness; uma atualização dele pode removê-la ou mudar os nomes das classes.
-- `designWidth` é 192, valor usado pelos exemplos da comunidade para a Band 8 Pro (tela 336x480).
+- `designWidth` é 192 (tela 336x480).

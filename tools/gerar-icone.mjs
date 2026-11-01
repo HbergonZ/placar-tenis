@@ -1,8 +1,8 @@
-// Gera src/common/icon.png (bola de tênis em 96x96 com ~20% de margem transparente: a pulseira estica o ícone para uma vaga maior que a dos ícones do sistema) sem dependências externas.
+// Gera src/common/icon.png (bola de tênis em 96x96 sobre fundo preto, ocupando ~75% do quadro) sem dependências externas.
 import { deflateSync } from 'node:zlib'
 import { writeFileSync } from 'node:fs'
 
-const T = 96, R = 38, c = T / 2, k = R / 56
+const T = 96, R = 36, c = T / 2, k = R / 56
 const linhas = []
 for (let y = 0; y < T; y++) {
   const linha = [0]
@@ -13,7 +13,8 @@ for (let y = 0; y < T; y++) {
     const costura = Math.abs(Math.hypot(dx - 70 * k, dy) - 48 * k) < 3.2 * k || Math.abs(Math.hypot(dx + 70 * k, dy) - 48 * k) < 3.2 * k
     const alfa = Math.max(0, Math.min(1, R - d + 0.5))
     const cor = costura ? [255, 255, 255] : [200, 240, 74]
-    linha.push(...cor, Math.round(alfa * 255))
+    // Fundo preto opaco: a pulseira parece cortar margens transparentes e esticar o resto.
+    linha.push(...cor.map((v) => Math.round(v * alfa)), 255)
   }
   linhas.push(Buffer.from(linha))
 }

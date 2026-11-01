@@ -1,5 +1,6 @@
 // Compila o app e instala na Band 8 Pro pela página de debug escondida do Mi Fitness.
 // Uso: npm run deploy [-- --no-build] [-- --uninstall] [-- --serial <id>]
+//      npm run deploy -- --only-uninstall [--package <pacote>]   (remove o app da pulseira e para)
 // Fluxo adaptado de github.com/mhdbaselar/xiaomi-band-development (MIT), reescrito em Node para Windows.
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs'
@@ -11,7 +12,9 @@ const raiz = join(dirname(fileURLToPath(import.meta.url)), '..')
 const tmp = join(raiz, '.tmp')
 const args = process.argv.slice(2)
 const semBuild = args.includes('--no-build')
-const desinstalar = args.includes('--uninstall')
+const soDesinstalar = args.includes('--only-uninstall')
+const desinstalar = soDesinstalar || args.includes('--uninstall')
+const iPacote = args.indexOf('--package')
 const iSerial = args.indexOf('--serial')
 
 const espera = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -30,14 +33,14 @@ if (!serial) {
   serial = lista[0].split('\t')[0]
 }
 const adb = (...a) => rodar('adb', ['-s', serial, ...a])
-const pkg = JSON.parse(readFileSync(join(raiz, 'src', 'manifest.json'), 'utf8')).package
+const pkg = iPacote >= 0 ? args[iPacote + 1] : JSON.parse(readFileSync(join(raiz, 'src', 'manifest.json'), 'utf8')).package
 console.log(`==> Celular: ${serial}\n==> Pacote: ${pkg}`)
 
 const apk = adb('shell', 'pm', 'path', 'com.xiaomi.wearable').split(/\r?\n/)[0].replace('package:', '').trim()
 if (!apk) falhar('Mi Fitness (com.xiaomi.wearable) não está instalado. A versão chinesa (.chn) não serve.')
 
 // --- Build ---
-if (!semBuild) {
+if (!semBuild && !soDesinstalar) {
   console.log('==> Compilando...')
   // O aiot às vezes falha com EBUSY ao apagar a pasta temporária (VS Code observando); uma nova tentativa resolve.
   for (let tentativa = 1; ; tentativa++) {
@@ -133,6 +136,10 @@ if (desinstalar) {
   console.log('==> Desinstalando a versão anterior...')
   await tocar(/text="uninstall third app"/, 'uninstall third app')
   await espera(4000)
+}
+if (soDesinstalar) {
+  console.log('==> Pronto. Confira se o app sumiu da lista da pulseira.')
+  process.exit(0)
 }
 await tocar(/text="install third app"/, 'install third app')
 console.log(`\n==> No celular, escolha o arquivo ${nomeRpk} na pasta Xiaomi-band.`)
