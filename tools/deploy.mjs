@@ -97,8 +97,13 @@ function achar(regex) {
   if (!m) return null
   return [Math.round((+m[1] + +m[3]) / 2), Math.round((+m[2] + +m[4]) / 2)]
 }
+// Procura o elemento por alguns segundos (diálogos e teclado demoram a aparecer) e toca nele.
 async function tocar(regex, descricao) {
-  const p = achar(regex)
+  let p = null
+  for (let i = 0; i < 6 && !p; i++) {
+    p = achar(regex)
+    if (!p) await espera(1000)
+  }
   if (!p) falhar(`não achei "${descricao}" na tela do celular`)
   adb('shell', 'input', 'tap', String(p[0]), String(p[1]))
   await espera(1500)
@@ -112,24 +117,28 @@ for (let tentativa = 0; tentativa < 3 && !campo; tentativa++) {
   campo = achar(/class="android.widget.EditText"/)
 }
 if (!campo) falhar('o diálogo do nome do pacote não abriu')
-adb('shell', 'input', 'tap', String(campo[0]), String(campo[1]))
-await espera(500)
-// Alguns teclados Samsung põem um espaço depois do primeiro ponto; só apaga se o espaço apareceu.
 function textoDoCampo() {
   adb('shell', 'uiautomator', 'dump', '/sdcard/ui_tmp.xml')
   const m = adb('shell', 'cat', '/sdcard/ui_tmp.xml').match(/text="([^"]*)"[^>]*class="android.widget.EditText"/)
   return m ? m[1] : null
 }
-const primeiro = pkg.slice(0, pkg.indexOf('.'))
-adb('shell', 'input', 'text', primeiro)
-await espera(200)
-adb('shell', 'input', 'keyevent', '56')
-await espera(300)
-if ((textoDoCampo() || '').endsWith(' ')) adb('shell', 'input', 'keyevent', '67')
-adb('shell', 'input', 'text', pkg.slice(pkg.indexOf('.') + 1))
-await espera(600)
-const digitado = textoDoCampo()
-if (digitado !== null && digitado !== pkg) console.log(`    AVISO: o campo mostra "${digitado}", esperado "${pkg}"`)
+// Digita e confere; se o teclado ainda não estava pronto, limpa o campo e tenta de novo.
+let digitado = null
+for (let tentativa = 0; tentativa < 3 && digitado !== pkg; tentativa++) {
+  adb('shell', 'input', 'tap', String(campo[0]), String(campo[1]))
+  await espera(1000)
+  adb('shell', 'input', 'keyevent', '123', ...Array(40).fill('67'))
+  // Alguns teclados Samsung põem um espaço depois do primeiro ponto; só apaga se o espaço apareceu.
+  adb('shell', 'input', 'text', pkg.slice(0, pkg.indexOf('.')))
+  await espera(200)
+  adb('shell', 'input', 'keyevent', '56')
+  await espera(300)
+  if ((textoDoCampo() || '').endsWith(' ')) adb('shell', 'input', 'keyevent', '67')
+  adb('shell', 'input', 'text', pkg.slice(pkg.indexOf('.') + 1))
+  await espera(600)
+  digitado = textoDoCampo()
+}
+if (digitado !== pkg) falhar(`o campo mostra "${digitado}", esperado "${pkg}"`)
 await tocar(/text="OK"/, 'OK')
 
 if (desinstalar) {
