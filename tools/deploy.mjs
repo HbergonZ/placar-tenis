@@ -3,7 +3,7 @@
 //      npm run deploy -- --only-uninstall [--package <pacote>]   (remove o app da pulseira e para)
 // Fluxo adaptado de github.com/mhdbaselar/xiaomi-band-development (MIT), reescrito em Node para Windows.
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { homedir } from 'node:os'
@@ -43,11 +43,19 @@ if (!apk) falhar('Mi Fitness (com.xiaomi.wearable) não está instalado. A vers�
 if (!semBuild && !soDesinstalar) {
   console.log('==> Compilando...')
   // O aiot às vezes falha com EBUSY ao apagar a pasta temporária (VS Code observando); uma nova tentativa resolve.
+  const versao = JSON.parse(readFileSync(join(raiz, 'src', 'manifest.json'), 'utf8')).versionName
+  const rpkEsperado = join(raiz, 'dist', `${pkg}.debug.${versao}.rpk`)
   for (let tentativa = 1; ; tentativa++) {
+    const inicio = Date.now()
     try {
       rodar('npm', ['run', 'build'], { cwd: raiz, stdio: 'pipe', shell: true })
       break
     } catch (e) {
+      // O aiot gera o .rpk e só depois falha ao apagar C:devREA.temp_<projeto> (EBUSY no Windows).
+      if (/EBUSY/.test(e.stderr || '') && existsSync(rpkEsperado) && statSync(rpkEsperado).mtimeMs >= inicio - 1000) {
+        console.log('    (aiot falhou ao limpar a pasta temporária, mas o .rpk foi gerado)')
+        break
+      }
       if (tentativa >= 3) falhar('build falhou 3 vezes:\n' + (e.stdout || '') + (e.stderr || ''))
       console.log('==> Build falhou; tentando de novo...')
       await espera(3000)

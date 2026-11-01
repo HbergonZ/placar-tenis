@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises'
 
 // Carrega o mesmo módulo da pulseira sem transformar o build do Vela em ESM.
 const fonte = await readFile(new URL('../src/common/placar.js', import.meta.url), 'utf8')
-const { novoJogo, ponto, textoPontos, linhaGames, rotuloSituacao } =
+const { novoJogo, ponto, textoPontos, linhaGames, rotuloSituacao, ladoSaque } =
   await import('data:text/javascript;base64,' + Buffer.from(fonte).toString('base64'))
 
 function pontos(estado, sequencia) {
@@ -86,4 +86,22 @@ test('set único termina no primeiro set', () => {
   let e = novoJogo({ sets: 1 })
   for (let i = 0; i < 6; i++) e = pontos(e, game(0))
   assert.equal(e.vencedor, 0)
+})
+
+test('lado do saque: direita com total par, esquerda com ímpar, inclusive no tie-break', () => {
+  let e = novoJogo()
+  assert.equal(ladoSaque(e), 'direita')
+  e = ponto(e, 0)
+  assert.equal(ladoSaque(e), 'esquerda')
+  e = pontos(e, [1, 0, 1])
+  assert.deepEqual(textoPontos(e), ['30', '30'])
+  assert.equal(ladoSaque(e), 'direita')
+  e = pontos(e, [0, 0])
+  assert.deepEqual(e.games, [1, 0])
+  assert.equal(ladoSaque(e), 'direita')
+  e = novoJogo()
+  for (let i = 0; i < 6; i++) e = pontos(e, [...game(0), ...game(1)])
+  assert.equal(e.tiebreak, true)
+  e = pontos(e, [0, 1, 1])
+  assert.equal(ladoSaque(e), 'esquerda')
 })

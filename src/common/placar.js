@@ -101,6 +101,12 @@ export function linhaGames(estado, jogador) {
   return lista
 }
 
+// Lado de onde se saca e se recebe no próximo ponto, visto do próprio campo de cada jogador.
+// Total de pontos par: lado direito (iguais); ímpar: lado esquerdo (vantagem). Vale também no tie-break.
+export function ladoSaque(estado) {
+  return (estado.pontos[0] + estado.pontos[1]) % 2 === 0 ? 'direita' : 'esquerda'
+}
+
 export function rotuloSituacao(estado) {
   if (estado.vencedor !== null) return 'FIM DE JOGO'
   if (estado.tiebreak) return 'TIE-BREAK'

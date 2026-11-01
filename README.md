@@ -7,6 +7,7 @@ App de placar de tênis que roda direto na Xiaomi Smart Band 8 Pro. É um Quick 
 - Toque na faixa **EU** ou **ADV** para marcar o ponto. Os games de cada set aparecem em amarelo.
 - Contagem 0/15/30/40, iguais e vantagem (ou ponto decisivo, sem vantagem), games, sets e tie-break em 6-6.
 - Bolinha verde indica quem saca, inclusive a troca de saque no tie-break.
+- Dois tracinhos sob cada nome mostram o lado (esquerdo ou direito) de saque e recepção do próximo ponto; o lado certo acende em amarelo.
 - **DESFAZER** volta o último ponto (até 100 pontos).
 - **NOVO** pede um segundo toque antes de apagar a partida.
 - A partida fica salva (`@system.storage`) e pode ser retomada em "CONTINUAR PARTIDA".
@@ -25,6 +26,7 @@ App de placar de tênis que roda direto na Xiaomi Smart Band 8 Pro. É um Quick 
 | `tools/deploy.mjs` | Compila e instala na pulseira. |
 | `tools/LaunchFragment.java` | Abre a página de debug escondida do Mi Fitness. |
 | `tools/gerar-icone.mjs` | Gera `src/common/icon.png`. |
+| `docs/instalar-pulseira-iphone.md` | Guia (não testado) para instalar numa pulseira pareada com iPhone. |
 
 ## Comandos
 

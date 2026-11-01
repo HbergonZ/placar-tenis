@@ -5,17 +5,25 @@
       <div class="nome-col">
         <div class="bola {{ saqueEu ? 'bola-on' : '' }}"></div>
         <text class="nome">EU</text>
+        <div class="lados">
+          <div class="traco {{ ladoEsq ? 'traco-on' : '' }}"></div>
+          <div class="traco {{ ladoDir ? 'traco-on' : '' }}"></div>
+        </div>
       </div>
       <text class="games {{ gamesLongos ? 'games-longos' : '' }}">{{ gamesEu }}</text>
-      <text class="pontos">{{ pontosEu }}</text>
+      <text class="pontos {{ pontosEu === 'AD' ? 'pontos-ad' : '' }}">{{ pontosEu }}</text>
     </div>
     <div class="linha linha-adv" onclick="pontoAdv">
       <div class="nome-col">
         <div class="bola {{ saqueAdv ? 'bola-on' : '' }}"></div>
         <text class="nome">ADV</text>
+        <div class="lados">
+          <div class="traco {{ ladoEsq ? 'traco-on' : '' }}"></div>
+          <div class="traco {{ ladoDir ? 'traco-on' : '' }}"></div>
+        </div>
       </div>
       <text class="games {{ gamesLongos ? 'games-longos' : '' }}">{{ gamesAdv }}</text>
-      <text class="pontos">{{ pontosAdv }}</text>
+      <text class="pontos {{ pontosAdv === 'AD' ? 'pontos-ad' : '' }}">{{ pontosAdv }}</text>
     </div>
     <div class="rodape">
       <text class="botao" onclick="desfazer">DESFAZER</text>
@@ -28,7 +36,7 @@
 import router from '@system.router'
 import vibrator from '@system.vibrator'
 import brightness from '@system.brightness'
-import { novoJogo, ponto, textoPontos, linhaGames, rotuloSituacao } from '../../common/placar'
+import { novoJogo, ponto, textoPontos, linhaGames, rotuloSituacao, ladoSaque } from '../../common/placar'
 import { carregar, salvar, apagar } from '../../common/salvo'
 
 var LIMITE_HISTORICO = 100
@@ -54,6 +62,8 @@ export default {
     gamesEu: '',
     gamesAdv: '',
     gamesLongos: false,
+    ladoEsq: false,
+    ladoDir: false,
     pontosEu: '0',
     pontosAdv: '0',
     confirmandoNovo: false,
@@ -109,6 +119,10 @@ export default {
     this.gamesLongos = linhaGames(estado, 0).length > 2
     this.saqueEu = !fim && estado.sacador === 0
     this.saqueAdv = !fim && estado.sacador === 1
+    // Os dois jogadores ficam do mesmo lado (cada um olhando do seu campo), então a indicação é a mesma.
+    var lado = ladoSaque(estado)
+    this.ladoEsq = !fim && lado === 'esquerda'
+    this.ladoDir = !fim && lado === 'direita'
   },
   marcar(jogador) {
     if (!estado || estado.vencedor !== null) return
@@ -165,12 +179,16 @@ export default {
 .linha-eu { background-color: #12331f; }
 .linha-adv { background-color: #1f2a3a; }
 .nome-col { width: 48px; flex-direction: column; align-items: center; }
-.bola { width: 12px; height: 12px; margin-top: 3px; margin-bottom: 3px; border-radius: 6px; background-color: #000000; }
+.bola { width: 12px; height: 12px; margin-top: 2px; margin-bottom: 2px; border-radius: 6px; background-color: #000000; }
 .bola-on { background-color: #c8f04a; }
 .nome { height: 26px; font-size: 18px; font-weight: bold; color: #ffffff; text-align: center; }
 .games { flex: 1; lines: 1; font-size: 22px; font-weight: bold; color: #ffd60a; text-align: center; }
+.lados { width: 40px; height: 10px; margin-top: 4px; flex-direction: row; justify-content: space-between; }
+.traco { width: 17px; height: 5px; border-radius: 2px; background-color: #3a4a42; }
+.traco-on { background-color: #ffd60a; }
 .games-longos { font-size: 16px; font-weight: normal; }
-.pontos { width: 54px; font-size: 38px; font-weight: bold; color: #ffffff; text-align: right; }
+.pontos { width: 54px; lines: 1; font-size: 38px; font-weight: bold; color: #ffffff; text-align: right; }
+.pontos-ad { font-size: 26px; }
 .rodape { width: 184px; height: 42px; margin-top: 6px; flex-direction: row; justify-content: space-between; }
 .botao { width: 90px; height: 42px; font-size: 14px; font-weight: bold; color: #ffffff; text-align: center; background-color: #2a2a2a; border-radius: 22px; }
 .botao-alerta { background-color: #a33a2a; }
