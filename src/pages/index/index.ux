@@ -2,16 +2,16 @@
   <div class="page">
     <text class="titulo">PLACAR TENIS</text>
     <text class="opcao" onclick="trocarSets">{{ textoSets }}</text>
-    <text class="opcao" show="{{ !simples }}" onclick="trocarVantagem">{{ textoVantagem }}</text>
-    <text class="opcao" show="{{ !simples }}" onclick="trocarSacador">{{ textoSacador }}</text>
-    <text class="meta-label" show="{{ simples }}">Pontos para vencer</text>
-    <div class="meta-linha" show="{{ simples }}">
+    <text class="opcao" if="{{ !simples }}" onclick="trocarVantagem">{{ textoVantagem }}</text>
+    <text class="opcao" if="{{ !simples }}" onclick="trocarSacador">{{ textoSacador }}</text>
+    <text class="meta-label" if="{{ simples }}">Pontos para vencer</text>
+    <div class="meta-linha" if="{{ simples }}">
       <text class="ajuste" onclick="diminuirMeta">-</text>
       <text class="meta-valor">{{ meta }}</text>
       <text class="ajuste" onclick="aumentarMeta">+</text>
     </div>
     <text class="botao" onclick="comecar">COMECAR</text>
-    <text class="continuar" show="{{ temSalvo }}" onclick="continuar">CONTINUAR PARTIDA</text>
+    <text class="continuar" if="{{ temSalvo }}" onclick="continuar">CONTINUAR PARTIDA</text>
   </div>
 </template>
 
@@ -80,7 +80,7 @@ export default {
 </script>
 
 <style>
-.page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 12px; }
+.page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 6px; }
 .titulo { height: 30px; font-size: 20px; font-weight: bold; color: #c8f04a; text-align: center; }
 .meta-label { width: 176px; height: 40px; margin-top: 5px; lines: 1; font-size: 17px; font-weight: bold; color: #ffffff; text-align: center; }
 .meta-linha { width: 176px; height: 40px; margin-top: 5px; flex-direction: row; align-items: center; justify-content: space-between; }

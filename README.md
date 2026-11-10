@@ -57,6 +57,7 @@ Para atualizar, aumentar `versionCode` no `src/manifest.json` e rodar `npm run d
 
 ## Limitações conhecidas
 
+- Na tela inicial, as opções de cada modo usam renderização condicional (`if`), evitando que controles ocultos reservem espaço no firmware da pulseira. A altura máxima com "CONTINUAR PARTIDA" é de 263 px de CSS.
 - Testado na Band 8 Pro com Galaxy S23 e Mi Fitness 3.59.2i (2026-10-31).
 - A fonte da pulseira não tem letras acentuadas nem símbolos como `●`: textos exibidos ficam em ASCII.
 - A tela útil tem cerca de 192x274 px de CSS; conferir a altura total ao mexer no layout.
