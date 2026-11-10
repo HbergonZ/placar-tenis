@@ -7,13 +7,15 @@ var NOMES_PONTOS = ['0', '15', '30', '40']
 export function novoJogo(opcoes) {
   var o = opcoes || {}
   return {
+    tipo: o.tipo === 'simples' ? 'simples' : 'tenis',
+    meta: Math.max(1, Math.min(99, Math.floor(Number(o.meta) || 5))),
     sets: o.sets || 3,
     vantagem: o.vantagem !== false,
     setsFechados: [],
     games: [0, 0],
     pontos: [0, 0],
     tiebreak: false,
-    sacador: o.sacador === 1 ? 1 : 0,
+    sacador: o.tipo === 'simples' ? null : (o.sacador === 1 ? 1 : 0),
     // Quem sacou o primeiro ponto do tie-break; quem recebeu saca o game seguinte.
     sacadorTiebreak: null,
     vencedor: null
@@ -67,6 +69,10 @@ export function ponto(estado, jogador) {
   e.pontos[jogador]++
   var p = e.pontos[jogador]
   var q = e.pontos[1 - jogador]
+  if (e.tipo === 'simples') {
+    if (p >= e.meta) e.vencedor = jogador
+    return e
+  }
   if (e.tiebreak) {
     if (p >= 7 && p - q >= 2) {
       fecharGame(e, jogador)
@@ -85,7 +91,7 @@ export function ponto(estado, jogador) {
 export function textoPontos(estado) {
   var a = estado.pontos[0]
   var b = estado.pontos[1]
-  if (estado.tiebreak) return [String(a), String(b)]
+  if (estado.tipo === 'simples' || estado.tiebreak) return [String(a), String(b)]
   if (a >= 3 && b >= 3) {
     if (a === b) return ['40', '40']
     return a > b ? ['AD', ''] : ['', 'AD']
@@ -95,6 +101,7 @@ export function textoPontos(estado) {
 
 // Linha de cada jogador: games dos sets fechados seguidos dos games do set atual.
 export function linhaGames(estado, jogador) {
+  if (estado.tipo === 'simples') return []
   var lista = []
   for (var i = 0; i < estado.setsFechados.length; i++) lista.push(estado.setsFechados[i][jogador])
   if (estado.vencedor === null) lista.push(estado.games[jogador])
@@ -104,10 +111,15 @@ export function linhaGames(estado, jogador) {
 // Lado de onde se saca e se recebe no próximo ponto, visto do próprio campo de cada jogador.
 // Total de pontos par: lado direito (iguais); ímpar: lado esquerdo (vantagem). Vale também no tie-break.
 export function ladoSaque(estado) {
+  if (estado.tipo === 'simples') return null
   return (estado.pontos[0] + estado.pontos[1]) % 2 === 0 ? 'direita' : 'esquerda'
 }
 
 export function rotuloSituacao(estado) {
+  if (estado.tipo === 'simples') {
+    if (estado.vencedor !== null) return estado.vencedor === 0 ? 'EU VENCI' : 'ADV VENCEU'
+    return 'META: ' + estado.meta + ' PONTOS'
+  }
   if (estado.vencedor !== null) return 'FIM DE JOGO'
   if (estado.tiebreak) return 'TIE-BREAK'
   var a = estado.pontos[0]

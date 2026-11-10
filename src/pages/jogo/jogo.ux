@@ -3,9 +3,9 @@
     <text class="situacao">{{ situacao }}</text>
     <div class="linha linha-eu" onclick="pontoEu">
       <div class="nome-col">
-        <div class="bola {{ saqueEu ? 'bola-on' : '' }}"></div>
+        <div show="{{ !simples }}" class="bola {{ saqueEu ? 'bola-on' : '' }}"></div>
         <text class="nome">EU</text>
-        <div class="lados">
+        <div class="lados" show="{{ !simples }}">
           <div class="traco {{ ladoEsq ? 'traco-on' : '' }}"></div>
           <div class="traco {{ ladoDir ? 'traco-on' : '' }}"></div>
         </div>
@@ -15,9 +15,9 @@
     </div>
     <div class="linha linha-adv" onclick="pontoAdv">
       <div class="nome-col">
-        <div class="bola {{ saqueAdv ? 'bola-on' : '' }}"></div>
+        <div show="{{ !simples }}" class="bola {{ saqueAdv ? 'bola-on' : '' }}"></div>
         <text class="nome">ADV</text>
-        <div class="lados">
+        <div class="lados" show="{{ !simples }}">
           <div class="traco {{ ladoEsq ? 'traco-on' : '' }}"></div>
           <div class="traco {{ ladoDir ? 'traco-on' : '' }}"></div>
         </div>
@@ -51,12 +51,15 @@ function vibrar(modo) {
 export default {
   protected: {
     modo: 'novo',
+    tipo: 'tenis',
+    meta: '5',
     sets: '3',
     vantagem: '1',
     sacador: '0'
   },
   private: {
     situacao: '',
+    simples: false,
     saqueEu: false,
     saqueAdv: false,
     gamesEu: '',
@@ -71,6 +74,7 @@ export default {
   },
   onInit() {
     var pagina = this
+    estado = null
     historico = []
     if (this.modo === 'continuar') {
       carregar(function (dados) {
@@ -101,6 +105,8 @@ export default {
   },
   criarJogo() {
     return novoJogo({
+      tipo: this.tipo,
+      meta: this.meta,
       sets: parseInt(this.sets, 10) || 3,
       vantagem: this.vantagem !== '0',
       sacador: this.sacador === '1' ? 1 : 0
@@ -110,9 +116,10 @@ export default {
     if (!estado) return
     var p = textoPontos(estado)
     var fim = estado.vencedor !== null
+    this.simples = estado.tipo === 'simples'
     this.situacao = rotuloSituacao(estado)
-    this.pontosEu = fim ? (estado.vencedor === 0 ? 'V' : '') : p[0]
-    this.pontosAdv = fim ? (estado.vencedor === 1 ? 'V' : '') : p[1]
+    this.pontosEu = fim && !this.simples ? (estado.vencedor === 0 ? 'V' : '') : p[0]
+    this.pontosAdv = fim && !this.simples ? (estado.vencedor === 1 ? 'V' : '') : p[1]
     this.gamesEu = linhaGames(estado, 0).join(' ')
     this.gamesAdv = linhaGames(estado, 1).join(' ')
     // A partir de 3 sets na linha a fonte grande não cabe na faixa (~66 px).

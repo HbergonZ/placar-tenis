@@ -4,6 +4,7 @@ App de placar de tênis que roda direto na Xiaomi Smart Band 8 Pro. É um Quick 
 
 ## Funções
 
+- **Contagem simples**: toque na opção de modo ("Melhor de 3", "Melhor de 5", etc.) até chegar a "Contagem simples". Ajuste a meta com **- / +**, de 1 a 99 pontos (padrão: 5). Ganha quem atingir a meta primeiro, inclusive em 5–4, sem saque ou vantagem. O resultado final permanece visível; **DESFAZER** e a retomada da partida também funcionam nesse modo.
 - Toque na faixa **EU** ou **ADV** para marcar o ponto. Os games de cada set aparecem em amarelo.
 - Contagem 0/15/30/40, iguais e vantagem (ou ponto decisivo, sem vantagem), games, sets e tie-break em 6-6.
 - Bolinha verde indica quem saca, inclusive a troca de saque no tie-break.

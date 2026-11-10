@@ -2,8 +2,14 @@
   <div class="page">
     <text class="titulo">PLACAR TENIS</text>
     <text class="opcao" onclick="trocarSets">{{ textoSets }}</text>
-    <text class="opcao" onclick="trocarVantagem">{{ textoVantagem }}</text>
-    <text class="opcao" onclick="trocarSacador">{{ textoSacador }}</text>
+    <text class="opcao" show="{{ !simples }}" onclick="trocarVantagem">{{ textoVantagem }}</text>
+    <text class="opcao" show="{{ !simples }}" onclick="trocarSacador">{{ textoSacador }}</text>
+    <text class="meta-label" show="{{ simples }}">Pontos para vencer</text>
+    <div class="meta-linha" show="{{ simples }}">
+      <text class="ajuste" onclick="diminuirMeta">-</text>
+      <text class="meta-valor">{{ meta }}</text>
+      <text class="ajuste" onclick="aumentarMeta">+</text>
+    </div>
     <text class="botao" onclick="comecar">COMECAR</text>
     <text class="continuar" show="{{ temSalvo }}" onclick="continuar">CONTINUAR PARTIDA</text>
   </div>
@@ -13,11 +19,13 @@
 import router from '@system.router'
 import { carregar } from '../../common/salvo'
 
-var OPCOES_SETS = [1, 3, 5]
+var OPCOES_SETS = [1, 3, 5, 0]
 
 export default {
   private: {
     sets: 3,
+    simples: false,
+    meta: 5,
     vantagem: true,
     sacador: 0,
     temSalvo: false,
@@ -35,7 +43,8 @@ export default {
     })
   },
   atualizar() {
-    this.textoSets = this.sets === 1 ? 'Set unico' : 'Melhor de ' + this.sets
+    this.simples = this.sets === 0
+    this.textoSets = this.simples ? 'Contagem simples' : (this.sets === 1 ? 'Set unico' : 'Melhor de ' + this.sets)
     this.textoVantagem = this.vantagem ? 'Com vantagem' : 'Sem vantagem'
     this.textoSacador = this.sacador === 0 ? 'Saque: EU' : 'Saque: ADV'
   },
@@ -48,6 +57,12 @@ export default {
     this.vantagem = !this.vantagem
     this.atualizar()
   },
+  diminuirMeta() {
+    this.meta = Math.max(1, this.meta - 1)
+  },
+  aumentarMeta() {
+    this.meta = Math.min(99, this.meta + 1)
+  },
   trocarSacador() {
     this.sacador = 1 - this.sacador
     this.atualizar()
@@ -55,7 +70,7 @@ export default {
   comecar() {
     router.push({
       uri: '/pages/jogo',
-      params: { modo: 'novo', sets: String(this.sets), vantagem: this.vantagem ? '1' : '0', sacador: String(this.sacador) }
+      params: { modo: 'novo', tipo: this.simples ? 'simples' : 'tenis', meta: String(this.meta), sets: String(this.sets), vantagem: this.vantagem ? '1' : '0', sacador: String(this.sacador) }
     })
   },
   continuar() {
@@ -67,6 +82,10 @@ export default {
 <style>
 .page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 12px; }
 .titulo { height: 30px; font-size: 20px; font-weight: bold; color: #c8f04a; text-align: center; }
+.meta-label { width: 176px; height: 40px; margin-top: 5px; lines: 1; font-size: 17px; font-weight: bold; color: #ffffff; text-align: center; }
+.meta-linha { width: 176px; height: 40px; margin-top: 5px; flex-direction: row; align-items: center; justify-content: space-between; }
+.ajuste { width: 48px; height: 40px; font-size: 24px; font-weight: bold; color: #c8f04a; text-align: center; background-color: #1c2620; border-radius: 19px; }
+.meta-valor { width: 72px; height: 40px; lines: 1; font-size: 26px; font-weight: bold; color: #ffffff; text-align: center; }
 .opcao { width: 176px; height: 40px; margin-top: 5px; font-size: 18px; font-weight: bold; color: #ffffff; text-align: center; background-color: #1c2620; border-radius: 19px; }
 .botao { width: 176px; height: 46px; margin-top: 8px; font-size: 20px; font-weight: bold; color: #000000; text-align: center; background-color: #c8f04a; border-radius: 22px; }
 .continuar { width: 176px; height: 32px; margin-top: 6px; font-size: 17px; color: #c8f04a; text-align: center; }
