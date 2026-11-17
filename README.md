@@ -27,7 +27,6 @@ App de placar de tênis que roda direto na Xiaomi Smart Band 8 Pro. É um Quick 
 | `tools/deploy.mjs` | Compila e instala na pulseira. |
 | `tools/LaunchFragment.java` | Abre a página de debug escondida do Mi Fitness. |
 | `tools/gerar-icone.mjs` | Gera `src/common/icon.png`. |
-| `docs/instalar-pulseira-iphone.md` | Registro da tentativa (falhou) de instalar numa pulseira pareada com iPhone. |
 
 ## Comandos
 
