@@ -127,6 +127,7 @@ export default {
     try { brightness.setKeepScreenOn({ keepScreenOn: false }) } catch (e) {}
   },
   onDestroy() {
+    try { brightness.setKeepScreenOn({ keepScreenOn: false }) } catch (e) {}
     pararRelogio()
     if (timerNovo !== null) clearTimeout(timerNovo)
     timerNovo = null

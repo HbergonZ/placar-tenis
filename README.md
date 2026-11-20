@@ -73,3 +73,9 @@ Para atualizar, aumentar `versionCode` no `src/manifest.json` e rodar `npm run d
 - Por isso o ícone da lista ficou o da primeira instalação: a pulseira não atualiza o ícone em reinstalações. Mudar o ícone exigiria outro nome de pacote (deixando o app antigo na lista) ou um reset.
 - A página de debug é interna do Mi Fitness; uma atualização dele pode removê-la ou mudar os nomes das classes.
 - `designWidth` é 192 (tela 336x480).
+
+## Atualização 0.3.3 - tela antes do início
+
+A tela pode apagar normalmente nos menus e antes de iniciar o treino ou a partida. Durante a atividade, o app mantém a tela acesa; ao sair, libera o bloqueio de tela. No SetGO, retornar à lista de treinos salvos ou finalizar também libera a tela.
+
+Validação em 19/11/2026: 14 testes passaram; RPK gerado com sucesso (o toolkit retornou EBUSY apenas na limpeza final); instalação pelo Gadgetbridge concluída em 100%. O tempo real para apagar a tela ainda precisa ser conferido na pulseira.

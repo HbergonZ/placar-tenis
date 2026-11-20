@@ -19,6 +19,7 @@
 
 <script>
 import router from '@system.router'
+import brightness from '@system.brightness'
 import { carregar } from '../../common/salvo'
 
 var OPCOES_SETS = [1, 3, 5, 0]
@@ -39,6 +40,7 @@ export default {
     this.atualizar()
   },
   onShow() {
+    try { brightness.setKeepScreenOn({ keepScreenOn: false }) } catch (e) {}
     var pagina = this
     carregar(function (dados) {
       pagina.temSalvo = !!(dados && dados.estado.vencedor === null)

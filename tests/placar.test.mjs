@@ -162,10 +162,13 @@ test('botoes da tela inicial selecionam modo, ajustam meta e passam parametros',
   const script = ux.match(/<script>([\s\S]*?)<\/script>/)[1]
     .replace(/^import .*$/gm, '').replace('export default', 'pagina =')
   let destino
-  const ctx = { router: { push: (p) => { destino = p } }, carregar: (cb) => cb(null) }
+  let telaAcesa = true
+  const ctx = { brightness: { setKeepScreenOn({ keepScreenOn }) { telaAcesa = keepScreenOn } }, router: { push: (p) => { destino = p } }, carregar: (cb) => cb(null) }
   runInNewContext(script, ctx)
   const pagina = Object.assign({}, ctx.pagina, ctx.pagina.private)
   pagina.onInit()
+  pagina.onShow()
+  assert.equal(telaAcesa, false)
   pagina.trocarSets()
   pagina.trocarSets()
   assert.equal(pagina.textoSets, 'Contagem simples')
