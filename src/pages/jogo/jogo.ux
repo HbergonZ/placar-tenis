@@ -1,33 +1,38 @@
 <template>
   <div class="page">
-    <text class="situacao">{{ situacao }}</text>
-    <div class="linha linha-eu" onclick="pontoEu">
-      <div class="nome-col">
-        <div show="{{ !simples }}" class="bola {{ saqueEu ? 'bola-on' : '' }}"></div>
-        <text class="nome">EU</text>
-        <div class="lados" show="{{ !simples }}">
-          <div class="traco {{ ladoEsq ? 'traco-on' : '' }}"></div>
-          <div class="traco {{ ladoDir ? 'traco-on' : '' }}"></div>
-        </div>
+    <div class="view">
+      <div class="cabecalho">
+        <text class="situacao">{{ situacao }}</text>
+        <text class="hora">{{ hora }}</text>
       </div>
-      <text class="games {{ gamesLongos ? 'games-longos' : '' }}">{{ gamesEu }}</text>
-      <text class="pontos {{ pontosEu === 'AD' ? 'pontos-ad' : '' }}">{{ pontosEu }}</text>
-    </div>
-    <div class="linha linha-adv" onclick="pontoAdv">
-      <div class="nome-col">
-        <div show="{{ !simples }}" class="bola {{ saqueAdv ? 'bola-on' : '' }}"></div>
-        <text class="nome">ADV</text>
-        <div class="lados" show="{{ !simples }}">
-          <div class="traco {{ ladoEsq ? 'traco-on' : '' }}"></div>
-          <div class="traco {{ ladoDir ? 'traco-on' : '' }}"></div>
+      <div class="linha linha-eu" onclick="pontoEu">
+        <div class="nome-col">
+          <div show="{{ !simples }}" class="bola {{ saqueEu ? 'bola-on' : '' }}"></div>
+          <text class="nome">EU</text>
+          <div class="lados" show="{{ !simples }}">
+            <div class="traco {{ ladoEsq ? 'traco-on' : '' }}"></div>
+            <div class="traco {{ ladoDir ? 'traco-on' : '' }}"></div>
+          </div>
         </div>
+        <text class="games {{ gamesLongos ? 'games-longos' : '' }}">{{ gamesEu }}</text>
+        <text class="pontos {{ pontosEu === 'AD' ? 'pontos-ad' : '' }}">{{ pontosEu }}</text>
       </div>
-      <text class="games {{ gamesLongos ? 'games-longos' : '' }}">{{ gamesAdv }}</text>
-      <text class="pontos {{ pontosAdv === 'AD' ? 'pontos-ad' : '' }}">{{ pontosAdv }}</text>
-    </div>
-    <div class="rodape">
-      <text class="botao" onclick="desfazer">DESFAZER</text>
-      <text class="botao {{ confirmandoNovo ? 'botao-alerta' : '' }}" onclick="novo">{{ textoNovo }}</text>
+      <div class="linha linha-adv" onclick="pontoAdv">
+        <div class="nome-col">
+          <div show="{{ !simples }}" class="bola {{ saqueAdv ? 'bola-on' : '' }}"></div>
+          <text class="nome">ADV</text>
+          <div class="lados" show="{{ !simples }}">
+            <div class="traco {{ ladoEsq ? 'traco-on' : '' }}"></div>
+            <div class="traco {{ ladoDir ? 'traco-on' : '' }}"></div>
+          </div>
+        </div>
+        <text class="games {{ gamesLongos ? 'games-longos' : '' }}">{{ gamesAdv }}</text>
+        <text class="pontos {{ pontosAdv === 'AD' ? 'pontos-ad' : '' }}">{{ pontosAdv }}</text>
+      </div>
+      <div class="rodape">
+        <text class="botao" onclick="desfazer">DESFAZER</text>
+        <text class="botao {{ confirmandoNovo ? 'botao-alerta' : '' }}" onclick="novo">{{ textoNovo }}</text>
+      </div>
     </div>
   </div>
 </template>
@@ -43,6 +48,25 @@ var LIMITE_HISTORICO = 100
 var estado = null
 var historico = []
 var timerNovo = null
+var timerHora = null
+
+function pararRelogio() {
+  if (timerHora !== null) clearTimeout(timerHora)
+  timerHora = null
+}
+
+function iniciarRelogio(pagina) {
+  pararRelogio()
+  function atualizar() {
+    var agora = new Date()
+    var horas = agora.getHours()
+    var minutos = agora.getMinutes()
+    pagina.hora = (horas < 10 ? '0' : '') + horas + ':' + (minutos < 10 ? '0' : '') + minutos
+    var espera = (60 - agora.getSeconds()) * 1000 - agora.getMilliseconds() + 50
+    timerHora = setTimeout(atualizar, espera)
+  }
+  atualizar()
+}
 
 function vibrar(modo) {
   try { vibrator.vibrate({ mode: modo }) } catch (e) {}
@@ -69,6 +93,7 @@ export default {
     ladoDir: false,
     pontosEu: '0',
     pontosAdv: '0',
+    hora: '--:--',
     confirmandoNovo: false,
     textoNovo: 'NOVO'
   },
@@ -93,13 +118,16 @@ export default {
     }
   },
   onShow() {
+    iniciarRelogio(this)
     // Mantém a tela acesa durante a partida, se o firmware permitir.
     try { brightness.setKeepScreenOn({ keepScreenOn: true }) } catch (e) {}
   },
   onHide() {
+    pararRelogio()
     try { brightness.setKeepScreenOn({ keepScreenOn: false }) } catch (e) {}
   },
   onDestroy() {
+    pararRelogio()
     if (timerNovo !== null) clearTimeout(timerNovo)
     timerNovo = null
   },
@@ -180,8 +208,11 @@ export default {
 </script>
 
 <style>
-.page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 6px; }
-.situacao { height: 26px; font-size: 18px; font-weight: bold; color: #c8f04a; text-align: center; }
+.page { flex: 1; flex-direction: column; background-color: #000000; }
+.view { flex: 1; width: 192px; flex-direction: column; align-items: center; padding-top: 6px; }
+.cabecalho { width: 184px; height: 26px; flex-direction: row; align-items: center; }
+.situacao { width: 138px; height: 26px; lines: 1; font-size: 16px; font-weight: bold; color: #c8f04a; text-align: left; }
+.hora { width: 46px; height: 26px; lines: 1; font-size: 13px; color: #aeb7c2; text-align: right; }
 .linha { width: 184px; height: 88px; margin-top: 4px; border-radius: 16px; flex-direction: row; align-items: center; padding-left: 8px; padding-right: 8px; }
 .linha-eu { background-color: #12331f; }
 .linha-adv { background-color: #1f2a3a; }

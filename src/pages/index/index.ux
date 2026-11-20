@@ -1,17 +1,19 @@
 <template>
   <div class="page">
-    <text class="titulo">PLACAR TENIS</text>
-    <text class="opcao" onclick="trocarSets">{{ textoSets }}</text>
-    <text class="opcao" if="{{ !simples }}" onclick="trocarVantagem">{{ textoVantagem }}</text>
-    <text class="opcao" if="{{ !simples }}" onclick="trocarSacador">{{ textoSacador }}</text>
-    <text class="meta-label" if="{{ simples }}">Pontos para vencer</text>
-    <div class="meta-linha" if="{{ simples }}">
-      <text class="ajuste" onclick="diminuirMeta">-</text>
-      <text class="meta-valor">{{ meta }}</text>
-      <text class="ajuste" onclick="aumentarMeta">+</text>
+    <div class="view">
+      <text class="titulo">PLACAR TENIS</text>
+      <text class="opcao" onclick="trocarSets">{{ textoSets }}</text>
+      <text class="opcao" if="{{ !simples }}" onclick="trocarVantagem">{{ textoVantagem }}</text>
+      <text class="opcao" if="{{ !simples }}" onclick="trocarSacador">{{ textoSacador }}</text>
+      <text class="meta-label" if="{{ simples }}">Pontos para vencer</text>
+      <div class="meta-linha" if="{{ simples }}">
+        <text class="ajuste" onclick="diminuirMeta">-</text>
+        <text class="meta-valor">{{ meta }}</text>
+        <text class="ajuste" onclick="aumentarMeta">+</text>
+      </div>
+      <text class="botao" onclick="comecar">COMECAR</text>
+      <text class="continuar" if="{{ temSalvo }}" onclick="continuar">CONTINUAR PARTIDA</text>
     </div>
-    <text class="botao" onclick="comecar">COMECAR</text>
-    <text class="continuar" if="{{ temSalvo }}" onclick="continuar">CONTINUAR PARTIDA</text>
   </div>
 </template>
 
@@ -80,7 +82,8 @@ export default {
 </script>
 
 <style>
-.page { flex-direction: column; align-items: center; background-color: #000000; padding-top: 6px; }
+.page { flex: 1; flex-direction: column; background-color: #000000; }
+.view { flex: 1; width: 192px; flex-direction: column; align-items: center; padding-top: 6px; }
 .titulo { height: 30px; font-size: 20px; font-weight: bold; color: #c8f04a; text-align: center; }
 .meta-label { width: 176px; height: 40px; margin-top: 5px; lines: 1; font-size: 17px; font-weight: bold; color: #ffffff; text-align: center; }
 .meta-linha { width: 176px; height: 40px; margin-top: 5px; flex-direction: row; align-items: center; justify-content: space-between; }

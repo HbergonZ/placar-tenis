@@ -14,6 +14,7 @@ App de placar de tênis que roda direto na Xiaomi Smart Band 8 Pro. É um Quick 
 - A partida fica salva (`@system.storage`) e pode ser retomada em "CONTINUAR PARTIDA".
 - Vibra curto a cada ponto e longo ao fechar game, set ou partida.
 - Pede ao firmware para manter a tela acesa durante a partida.
+- Mostra a hora atual, em tamanho discreto, no canto superior do placar.
 
 ## Estrutura
 
@@ -36,6 +37,14 @@ npm test          # testes das regras
 npm run build     # gera dist/dev.rea.placartenis.debug.<versão>.rpk
 npm run deploy    # compila e instala na pulseira (precisa do celular no adb)
 ```
+
+## Instalação pelo Gadgetbridge
+
+Em 19/11/2026, a versão 0.3.2 foi enviada à Smart Band 8 Pro pelo Gadgetbridge 2026.11.1 no Galaxy S23. O log registrou "Instalação do rpk concluída; 100%", e o aplicativo apareceu no gerenciador de apps instalados. A exibição da hora no aparelho ainda precisa de confirmação visual.
+
+Com a pulseira autenticada e conectada no Gadgetbridge, abra o gerenciador de aplicativos, toque em Instalar, escolha o RPK da pasta `dist` copiado para o celular e confirme a instalação. Mantenha Mi Fitness e Notify desativados durante o uso para evitar disputa pela conexão. Não desvincule nem restaure a pulseira para atualizar o aplicativo.
+
+O Mi Fitness 3.60.0i removeu a página interna de debug usada pelo script abaixo. O fluxo antigo permanece como referência para versões compatíveis; para a versão atual, use o Gadgetbridge. Chaves de autenticação são privadas e não devem ser adicionadas ao repositório.
 
 ## Instalação na pulseira
 
